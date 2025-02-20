@@ -58,6 +58,9 @@ public struct RewardRateUpdated has copy, drop {
     new_rate: u64,
 }
 
+// errors
+const EInsufficientBalance: u64 = 1;
+
 // init
 fun init(otw: SUI_STAKING, ctx: &mut TxContext) {
     package::claim_and_keep(otw, ctx);
@@ -112,6 +115,9 @@ public fun unstake<StakedToken>(
     ctx: &mut TxContext,
 ): Coin<StakedToken> {
     let reward = user_stake_mod::calculate_reward(&user_stake, clock.timestamp_ms());
+    let total_paid = user_stake.get_stake_amount() + reward;
+
+    assert!(staking.balance.value() >= total_paid, EInsufficientBalance);
 
     event::emit(UserUnstaked {
         user: ctx.sender(),
@@ -121,11 +127,11 @@ public fun unstake<StakedToken>(
         reward,
     });
 
-    let reward = staking.balance.split(reward).into_coin(ctx);
+    let total_paid = staking.balance.split(total_paid).into_coin(ctx);
 
     user_stake_mod::burn_stake(StakingWtns {}, user_stake);
 
-    reward
+    total_paid
 }
 
 public fun withdraw<StakedToken>(
@@ -135,6 +141,8 @@ public fun withdraw<StakedToken>(
     ctx: &mut TxContext,
 ): Coin<StakedToken> {
     event::emit(AdminWithdrawn { amount });
+
+    assert!(staking.balance.value() >= amount, EInsufficientBalance);
 
     let withdrawn_token = staking.balance.split(amount).into_coin(ctx);
 
