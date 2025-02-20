@@ -40,3 +40,11 @@ public fun calculate_reward<StakingWtns: drop>(stake: &UserStake<StakingWtns>, n
 
     reward
 }
+
+public fun get_stake_id<StakingWtns: drop>(stake: &UserStake<StakingWtns>): address {
+    stake.id.to_address()
+}
+
+public fun get_stake_amount<StakingWtns: drop>(stake: &UserStake<StakingWtns>): u64 {
+    stake.amount
+}
