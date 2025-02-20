@@ -10,6 +10,7 @@ use sui_staking::user_stake::{Self as user_stake_mod, UserStake};
 
 use fun sui::dynamic_field::add as UID.add;
 use fun sui::dynamic_field::borrow as UID.borrow;
+use fun sui::dynamic_field::borrow_mut as UID.borrow_mut;
 
 public struct SUI_STAKING has drop {}
 
@@ -95,6 +96,17 @@ public fun deposit<StakedToken>(
     amount: Coin<StakedToken>,
 ) {
     staking.balance.join(amount.into_balance());
+}
+
+public fun update_reward_rate<StakedToken>(
+    _: &AdminCap,
+    self: &mut Staking<StakedToken>,
+    new_rate: u64,
+) {
+    let config: &mut StakeConfig<StakingWtns> = self
+        .id
+        .borrow_mut(ConfigKey<StakeConfig<StakingWtns>> {});
+    staking_config::update_reward_rate(StakingWtns {}, config, new_rate);
 }
 
 public fun get_config<Config: store, StakedToken>(self: &Staking<StakedToken>): &Config {

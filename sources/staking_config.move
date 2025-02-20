@@ -13,6 +13,14 @@ public fun new<StakingWtns: drop>(_: StakingWtns, reward_rate: u64): StakeConfig
     }
 }
 
+public fun update_reward_rate<StakingWtns: drop>(
+    _: StakingWtns,
+    config: &mut StakeConfig<StakingWtns>,
+    new_rate: u64,
+) {
+    config.reward_rate = new_rate;
+}
+
 public fun get_reward_rate<StakingWtns: drop>(config: &StakeConfig<StakingWtns>): u64 {
     config.reward_rate
 }
